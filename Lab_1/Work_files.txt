@@ -1,0 +1,30 @@
+mkdir Work
+mkdir Work/"Лабораторная работа №1!"
+mkdir Work/ФИО
+chmod u=rwx Work/"Лабораторная работа №1!"
+chmod g=rwx Work/"Лабораторная работа №1!"
+chmod o=w Work/"Лабораторная работа №1!"
+chmod u=w Work/ФИО
+touch Work/"Text @1"
+touch Work/"Text @2"
+touch Work/"Text #3"
+cd Work
+cat > "Text @1"
+Птица говорун отличается умом и сообразительностью!
+Отличается умом, отличается сообразительностью...
+cat "Text @1" >> "Text @2"
+mv "Text @2" "Лабораторная работа №1!"
+cp "Text @1" ФИО
+tar -cf MyAchiv "Text @1" "Text #3"
+echo $(head -n 1 Text\ @1) >> Text\ #3
+echo "Будь осторожен! Преступник вооружен!" >> Text\ #3
+cd ФИО
+touch Result_one
+cd ..
+tac Text\ @1 > ФИО/Result_one
+cd ФИО
+mv Result_one Result_two
+touch 'Лабораторная работа №1!'/Result_3
+for f in 'ФИО/T*'; do cat $f >> "Лабораторная работа №1!"/Result_3 ; done
+echo $(uname) >> "Лабораторная работа №1!"/Result_3
+echo $(date) >> "Лабораторная работа №1!"/Result_3
