@@ -2,7 +2,7 @@ format elf64
 
 public _start
 
-include '/workspaces/System_programming/Lab_5/func.asm'
+include 'func.asm'
 
 section '.bss' writable
 buffer rb 200
