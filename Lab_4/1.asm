@@ -1,50 +1,63 @@
 format ELF64
 public _start
 
-msg dq 256
+input dq 255
 
 _start:
-    mov rax, 0
-    mov rdi, 0
-    mov rsi, msg
-    mov rdx, 256
-    syscall
+    call read
     call str_number
-    call edit
+    call func
+    mov rax, rsi
     call print
-    
-edit:
+    call exit
+
+; input:  rax
+; output: rsi
+func:
     mov rax, rax
     mov rcx, 10
     xor rbx, rbx
     mov rdi, 1
     xor rsi, rsi
-    step:
+    iter0:
         xor rdx, rdx
         div rcx
+
         push rax
+
         xor rbp, rbp
-        .step2:
+        .zero:
             inc rbp
-            mov rax, 10
+            mov rax, 10 ; rdx *= 10
             mov rdx, rdx
             mul rdx
+
             mov rdx, rax
+
             cmp rdi, rbp
-            jne .step2
+            jne .zero
         add rsi, rdx
         pop rax
         inc rbx
         inc rdi
         inc rdi
         cmp rax, 0
-        jne step
+        jne iter0
+
+    ret
+
+
+read:
+    mov rax, 0
+    mov rdi, 0
+    mov rsi, input
+    mov rdx, 255
+    syscall
     ret
 
 
 place db ?
 print:
-    mov rax, rsi
     mov rcx, 10
     xor rbx, rbx
     iter1:
@@ -63,7 +76,6 @@ print:
     jne iter2
  mov rax, 0xA
  call print_symbl
- call exit
  ret
 
 print_symbl:
