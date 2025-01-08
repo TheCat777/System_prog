@@ -11,8 +11,8 @@ section '.bss' writable
     args rq 4
 
     input db "input.txt", 0
+    input2 db "input.txt", 0
     output db "output.txt", 0
-    output2 db "output2.txt", 0
 	
 section '.text' executable
 _start:	
@@ -26,7 +26,7 @@ main_loop:
     mov [args], buffer
     mov [args+8], input
     mov [args+16], output
-    mov [args+24], output2
+    mov [args+24], 0
     mov rsi, args
     mov rdi, buffer
     mov rax, 59
