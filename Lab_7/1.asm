@@ -5,13 +5,13 @@ public _start
 include 'func.asm'
 
 section '.bss' writable
-buffer rb 200
-pid rq 1
-status rd 1
-args rq 4
-
-input db "input.txt", 0
-output db "output.txt", 0
+    buffer rb 200
+    pid rq 1
+    status rd 1
+    args rq 4
+    
+    input db "input.txt", 0
+    output db "output.txt", 0
 	
 section '.text' executable
 _start:	
