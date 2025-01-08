@@ -43,11 +43,11 @@ _start:
         dec rcx
         xor rax, rax
         mov al, [array + rcx]
-        mov rsi, buffer
-        call number_str
-        call print_str
-        mov rsi, space
-        call print_str
+        ;mov rsi, buffer
+        ;call number_str
+        ;call print_str
+        ;mov rsi, space
+        ;call print_str
         inc rcx
     loop .print
 
