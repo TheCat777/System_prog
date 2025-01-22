@@ -8,10 +8,10 @@ section '.bss' writable
     buffer rb 200
     pid rq 1
     status rd 1
-    args rq 4
+    args rq 5             ; сменить 5 на 4
 
     input db "input.txt", 0
-    input2 db "input.txt", 0
+    input2 db "input2.txt", 0   ; забыть
     output db "output.txt", 0
 	
 section '.text' executable
@@ -25,8 +25,9 @@ main_loop:
     jne wait_up
     mov [args], buffer
     mov [args+8], input
-    mov [args+16], output
-    mov [args+24], 0
+    mov [args+16], input2   ; поменять на output
+    mov [args+24], output   ; сменить на 0
+    mov [args+32], 0        ; забыть
     mov rsi, args
     mov rdi, buffer
     mov rax, 59

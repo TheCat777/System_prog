@@ -8,7 +8,7 @@ extrn atof
 
 section '.data' writable
 input db "%lf", 0
-output db "%-10d%-10d%-17lf%-15lf", 0xa, 0
+output db "%-10d%-10d%-17.7f%-15.7f", 0xa, 0
 text db "number    count     real cos         calc cos", 0xa, 0
 const_1 dq 2.0
 
@@ -55,6 +55,7 @@ _start:
         fstp [temp_sum]
 
         .loop2:
+            inc [count]
             finit
             fld [temp_sum]
             fld [cos]
@@ -68,7 +69,6 @@ _start:
             fcomip st0, st1
             ja .next
 
-            inc [count]
 
             finit
             fild [count]

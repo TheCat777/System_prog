@@ -43,11 +43,11 @@ _start:
         dec rcx
         xor rax, rax
         mov al, [array + rcx]
-        ;mov rsi, buffer
-        ;call number_str
-        ;call print_str
-        ;mov rsi, space
-        ;call print_str
+        mov rsi, buffer
+        call number_str
+        call print_str
+        mov rsi, space
+        call print_str
         inc rcx
     loop .print
 
@@ -131,7 +131,8 @@ _start:
     mov rax, ARRLEN
     mov r8, 4
     div r8
-    mov r8, rax
+    mov r8, 3
+    mul r8
 
     mov rax, ARRLEN
     sub rax, r8
@@ -204,22 +205,17 @@ _start:
         jmp .loop1
 
     .next1:
-    mov rax, 9999999
+    mov rax, 0
     xor rbx, rbx
     xor rcx, rcx
     .comp_loop:
         cmp rcx, 10
         je .next2
 
-        push rax
-        mov rax, 8
-        mul rcx
-        mov rdx, rax
-        pop rax
-
-        cmp rax, [digits + rdx]
-        jl @f
-        mov rax, [digits + rdx]
+        mov r9, [digits + 8*rcx]
+        cmp rax, r9
+        jnl @f
+        mov rax, r9
         mov rbx, rcx
 
         @@:

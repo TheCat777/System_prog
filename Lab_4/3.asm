@@ -7,6 +7,7 @@ include 'func.asm'
 section '.bss' writable
 input dq ?
 output dq ?
+count dq 10
 
 section '.text' executable
 _start:
@@ -27,18 +28,17 @@ _start:
 
     ;два складываем два вычитаем
     .l1:
+        cmp r9, [count]
+        je .count_add
+
         xor rdx, rdx
         mov rax, r9
-        mov rcx, 10
+        mul r9
+        mov r10, rax
+        mov rcx, [count]
         div rcx
 
-        cmp rdx, 0
-        je .solve
-        cmp rdx, 1
-        je .solve
-        cmp rdx, 5
-        je .solve
-        cmp rdx, 6
+        cmp rdx, r9
         je .solve
 
         inc r9
@@ -47,15 +47,34 @@ _start:
 
     mov rax, 0xA
     call print
+    
     call exit
 
 .solve:
     mov rax, r9
     call print_num
+    mov rax, '-'
+    call print
+    mov rax, r10
+    call print_num
     mov rax, ' '
     call print
 
     inc r9
+
+    cmp r9, r8
+    jl .l1
+
+    mov rax, 0xA
+    call print
+    call exit
+
+.count_add:
+    mov rax, [count]
+    mov r10, 10
+    mul r10
+    mov [count], rax
+
     cmp r9, r8
     jl .l1
 
