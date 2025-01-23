@@ -4,7 +4,7 @@ include 'func.asm'
 public _start
 
 THREAD_FLAGS = 2147585792
-ARRLEN = 731
+ARRLEN = 10
 
 section '.bss' writable
     array rb ARRLEN

@@ -13,15 +13,15 @@ int main(){
     start();
     add_num(97);
     add_num(27);
-    add_num(31);
+    add_num(30);
     add_num(93);
 
-    del_num();
+    //del_num();
     print_array();
 
     printf("Even---%d\n", count_even());
     printf("Prime--%d\n", count_prime());
     printf("First--%d\n", count_first());
 
-    close();
+    //close();
 }

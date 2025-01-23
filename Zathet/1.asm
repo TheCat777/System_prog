@@ -5,7 +5,7 @@ include 'func.asm'
 
 
 section '.bss' writable
-    buffer rb 200
+    buffer rb 100
     status rd 1
     input dq ?
     output dq ?
@@ -18,6 +18,9 @@ section '.bss' writable
 
     buffer2 db 1
     buffer3 rb 200
+    buffer7 rb 100
+
+    buffer_space db " ", 0
 
     number rb 0
     const = 10
@@ -71,9 +74,9 @@ _start:
     .temp:
     xor rax, rax
     mov al, [number]
-    mov [array + r9], al
+    mov [array + 8*r9], al
     xor rax, rax
-    mov al, [array + r9]
+    mov al, [array + 8*r9]
 
     inc r9
     mov [number], 0
@@ -96,6 +99,7 @@ _start:
         cmp rax, 0
         jne .filter_loop
 
+
     mov r9, [count]
     mov rax, r9
     call print_num
@@ -111,7 +115,7 @@ _start:
         inc r8
         cmp r8, r9
         jne l2 
-    ;call write
+    call write
     call eclose
 
 add_num:
@@ -162,18 +166,26 @@ filter:
     dec rcx
     .check:
         mov rdx, [rsi]
-        mov rbx, [rsi+1]
+        mov rbx, [rsi+8]
         cmp rdx, rbx
         jbe .ok
 
         mov [rsi], rbx
-        mov [rsi+1], rdx
+        mov [rsi+8], rdx
         inc rax
 
         .ok:
         inc rsi
+        inc rsi
+        inc rsi
+        inc rsi
+        inc rsi
+        inc rsi
+        inc rsi
+        inc rsi
     loop .check
     ret
+
 
 write:
 
@@ -193,27 +205,38 @@ write:
     ;;Сохраняем файловый дескриптор
     mov r8, rax
 
+
+    dec r9
+    mov r10, r9
+
     mov rsi, rbx
-
     .loop_3:
-        ;mov rax, [array+r9]
-        mov rsi, buffer
+        xor rax, rax
+        mov al, [array+8*r9]
+        mov rsi, buffer7
         call number_str
-        ;mov rax, [array+r9]
-        call print_num
-        call new_line
-        
-        ;call len_str
-        ;mov rdx, rax
-        ;mov [buffer+rdx],0x0A
 
-        ;mov rax, 1
-        ;mov rdi, r8
-        ;mov rsi, buffer
+        mov rax, buffer7
+        call len_str
+        mov rdx, rax
+        mov [buffer7+rdx], 0x0a
+        inc rdx
+
+        ;mov rsi, buffer7
+        ;call print_str
+        
+        mov rax, 1
+        mov rdi, r8
+        mov rsi, buffer7
+        syscall
+
+        ;mov rsi, buffer_space
         ;syscall
+
+
         dec r9
         cmp r9, 0
-        jb .loop_3
+        jnl .loop_3
 
     call exit
 

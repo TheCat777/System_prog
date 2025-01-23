@@ -33,19 +33,16 @@ start:
 	syscall
 
 	mov rsi, rax  ;Сохраняем адрес памяти анонимного отображения
-	mov rax, 0
-	mov rdi, 0
-	mov rdx,  1000
-	syscall
+	
 
-    mov rbp, rsi
+    mov r15, rsi
 
     ret
 	
 
 add_num:
     mov rax, [count]
-    mov [rbp+8*rax], rdi
+    mov [r15+8*rax], rdi
     inc [count]
     ret
 
@@ -53,8 +50,8 @@ del_num:
     dec [count]
     xor rax, rax
     .loop:
-        mov rbx, [rbp+8*rax+8]
-        mov [rbp+8*rax], rbx
+        mov rbx, [r15+8*rax+8]
+        mov [r15+8*rax], rbx
 
         inc rax
         cmp rax, [count]
@@ -68,15 +65,15 @@ count_prime:
     .loop1:
         cmp rbx, [count]
         je .e
-        mov rax, [rbp+8*rbx]
+        mov rax, [r15+8*rbx]
         cmp rax, 10
         jl .primt_first_check
 
         mov rcx, 2
-        mov r11, [rbp+8*rbx]
+        mov r11, [r15+8*rbx]
         .loop2:
             xor rdx, rdx
-            mov rax, [rbp+8*rbx]
+            mov rax, [r15+8*rbx]
             div rcx
             cmp rdx, 0
             je .not_prime
@@ -126,7 +123,7 @@ count_first:
     mov r9, one
     .loop:
         xor rdx, rdx
-        mov rax, [rbp+8*rbx]
+        mov rax, [r15+8*rbx]
         div r8
         cmp rdx, r9
         je .plus
@@ -154,7 +151,7 @@ count_even:
     mov r9, 0
     .loop:
         xor rdx, rdx
-        mov rax, [rbp+8*rbx]
+        mov rax, [r15+8*rbx]
         div r8
         cmp rdx, r9
         je .plus
@@ -175,7 +172,7 @@ count_even:
         ret
 
 close:
-    mov rdi, rbp
+    mov rdi, r15
 	mov rsi, max_count
 	mov rax, 11
 	syscall
@@ -185,7 +182,7 @@ print_array:
     xor r12, r12
     .loop:
         xor rdx, rdx
-        mov rax, [rbp+8*r12]
+        mov rax, [r15+8*r12]
         call print_num
         call new_line
         
