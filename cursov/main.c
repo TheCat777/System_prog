@@ -1,13 +1,32 @@
 #include <ncurses.h> //подключаем библиотеку ncurses
 #include <stdio.h>
+#include <time.h>
 
-
-int main(int argc,char *argv[])
+void delay(int number_of_seconds)
 {
+	// Converting time into milli_seconds
+	int milli_seconds = 1000 * number_of_seconds;
+
+	// Storing start time
+	clock_t start_time = clock();
+
+	// looping till required time is not achieved
+	while (clock() < start_time + milli_seconds)
+		;
+}
+
+int main(int argc, char *argv[])
+{
+    int type;
+    printf("Режим работы:\n(1) - самостоятельная работа\n(2) - ручные итерации\n");
+    scanf("%d", &type);
+
+
     // инициализация (должна быть выполнена 
     // перед использованием ncurses)
     initscr();
     curs_set(0);  // "невидимый курсор"
+    
 
     start_color();
     init_pair(1, COLOR_WHITE, COLOR_WHITE); // цвет живых клеток
@@ -57,7 +76,8 @@ int main(int argc,char *argv[])
         }
     }
     refresh();
-    getch();
+    if (type == 2)
+        getch();
 
     while(true){
         for (int i = 0; i < row; ++i){ // Блок подсчта количества соседних
@@ -83,7 +103,6 @@ int main(int argc,char *argv[])
                 }
                 
                 
-
                 if (data[i*col+j] && (sum == 2 || sum == 3))  // Если клетка живая условие
                     new_data[i*col+j] = true;
                 else if (data[i*col+j] == false && sum == 3)  // Если клетка мёртвая условие
@@ -105,9 +124,14 @@ int main(int argc,char *argv[])
             }
         }
         refresh();
-        int ch = getch();
-        if (ch == ' ') // условие выхода из игры
-            break;
+        if (type == 2){
+            int ch = getch();
+            if (ch == ' ') // условие выхода из игры
+                break;
+        }
+        else{
+            delay(100); // пауза между циклами
+        }
     }
 
     endwin(); // завершение работы с ncurses
