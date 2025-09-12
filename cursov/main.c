@@ -1,5 +1,6 @@
 #include <ncurses.h> //подключаем библиотеку ncurses
 #include <stdio.h>
+#include <stdlib.h>
 #include <time.h>
 
 void delay(int number_of_seconds)
@@ -17,9 +18,11 @@ void delay(int number_of_seconds)
 
 int main(int argc, char *argv[])
 {
-    int type;
-    printf("Режим работы:\n(1) - самостоятельная работа\n(2) - ручные итерации\n");
+    int type, type2;
+    printf("Режим работы циклов:\n(1) - самостоятельная работа\n(2) - ручные итерации\n");
     scanf("%d", &type);
+    printf("Стартовое наполнение:\n(1) - заполнение из файла\n(2) - случайное\n");
+    scanf("%d", &type2);
 
 
     // инициализация (должна быть выполнена 
@@ -39,47 +42,58 @@ int main(int argc, char *argv[])
     bool new_data[row*col];
 
     for (int i = 0; i < row * col; ++i){  // первичное заполнение пустотой
-            data[i] = false;
-        }
-
-    //data[4*col+10] = true;  // глайдер для примера
-    //data[4*col+9] = true;
-    //data[3*col+8] = true;
-    //data[3*col+10] = true;
-    //data[2*col+10] = true;
-    
-    // чтение из файла стартового состояния
-    FILE *file = fopen("start.txt", "r");
-    if (file == NULL) {
-        perror("Ошибка при открытии файла");
-        return 1;
+        data[i] = false;
     }
 
-    int ch, row_i=0, col_j=0;
-    while ((ch = fgetc(file)) != EOF) {
-        if (ch == '\n'){
-            ++row_i;
-            col_j = 0;
+    if (type2 == 1){
+        // чтение из файла стартового состояния
+        FILE *file = fopen("start.txt", "r");
+        if (file == NULL) {
+            perror("Ошибка при открытии файла");
+            return 1;
         }
-        if (ch == '1'){
-            data[row_i*col+col_j] = true;
-        }
-        col_j++;
-    }
 
-    fclose(file);
-
-    for (int i = 0; i < row * col; ++i){ // вторичное заполнение уже экрана, чтобы сразу увидеть начальные условия
-        if (data[i] == true){
-            move(i / col, i % col);
-            printw(" ");
+        int ch, row_i=0, col_j=0;
+        while ((ch = fgetc(file)) != EOF) {
+            if (ch == '\n'){
+                ++row_i;
+                col_j = 0;
+            }
+            if (ch == '1'){
+                data[row_i*col+col_j] = true;
+            }
+            col_j++;
+        }
+        fclose(file);
+    }
+    else{
+        for (int i = 1; i < row - 1; ++i){ // Блок подсчта количества соседних
+            for (int j = 1; j < col - 1; ++j){
+                if (rand() % 2){
+                    data[i*col+j] = true;
+                }
+            }
         }
     }
-    refresh();
-    if (type == 2)
-        getch();
 
     while(true){
+        clear(); // отрисовка
+        for (int i = 0; i < row * col; ++i){ 
+            if (data[i] == true){
+                move(i / col, i % col);
+                printw(" ");
+            }
+        }
+        refresh();
+        if (type == 2){
+            int ch = getch();
+            if (ch == ' ') // условие выхода из игры
+                break;
+        }
+        else{
+            delay(100); // пауза между циклами
+        }
+
         for (int i = 0; i < row; ++i){ // Блок подсчта количества соседних
             for (int j = 0; j < col; ++j){
                 int sum = 0;
@@ -114,23 +128,6 @@ int main(int argc, char *argv[])
 
         for (int i = 0; i < row * col; ++i){ // обновление на новый цикл
             data[i] = new_data[i];
-        }
-
-        clear(); // отрисовка
-        for (int i = 0; i < row * col; ++i){ 
-            if (data[i] == true){
-                move(i / col, i % col);
-                printw(" ");
-            }
-        }
-        refresh();
-        if (type == 2){
-            int ch = getch();
-            if (ch == ' ') // условие выхода из игры
-                break;
-        }
-        else{
-            delay(100); // пауза между циклами
         }
     }
 
