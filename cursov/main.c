@@ -47,7 +47,7 @@ int main(int argc, char *argv[])
     //data[3*col+8] = true;
     //data[3*col+10] = true;
     //data[2*col+10] = true;
-
+    
     // чтение из файла стартового состояния
     FILE *file = fopen("start.txt", "r");
     if (file == NULL) {
