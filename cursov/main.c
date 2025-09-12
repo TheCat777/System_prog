@@ -35,14 +35,14 @@ int main(int argc, char *argv[])
     init_pair(1, COLOR_WHITE, COLOR_WHITE); // цвет живых клеток
     color_set(1, NULL);
 
-    int row, col;
-    getmaxyx(stdscr, row, col); // получение размера консоли
+    int max_y, max_x;
+    getmaxyx(stdscr, max_y, max_x); // получение размера консоли
 
-    bool data[row*col];
-    bool new_data[row*col];
+    bool array[max_y*max_x];
+    bool new_array[max_y*max_x];
 
-    for (int i = 0; i < row * col; ++i){  // первичное заполнение пустотой
-        data[i] = false;
+    for (int i = 0; i < max_y * max_x; ++i){  // первичное заполнение пустотой
+        array[i] = false;
     }
 
     if (type2 == 1){
@@ -60,17 +60,17 @@ int main(int argc, char *argv[])
                 col_j = 0;
             }
             if (ch == '1'){
-                data[row_i*col+col_j] = true;
+                array[row_i*max_x+col_j] = true;
             }
             col_j++;
         }
         fclose(file);
     }
     else{
-        for (int i = 1; i < row - 1; ++i){ // Блок подсчта количества соседних
-            for (int j = 1; j < col - 1; ++j){
+        for (int i = 1; i < max_y - 1; ++i){ // Блок подсчта количества соседних
+            for (int j = 1; j < max_x - 1; ++j){
                 if (rand() % 2){
-                    data[i*col+j] = true;
+                    array[i*max_x+j] = true;
                 }
             }
         }
@@ -78,9 +78,9 @@ int main(int argc, char *argv[])
 
     while(true){
         clear(); // отрисовка
-        for (int i = 0; i < row * col; ++i){ 
-            if (data[i] == true){
-                move(i / col, i % col);
+        for (int i = 0; i < max_y * max_x; ++i){ 
+            if (array[i] == true){
+                move(i / max_x, i % max_x);
                 printw(" ");
             }
         }
@@ -94,40 +94,40 @@ int main(int argc, char *argv[])
             delay(100); // пауза между циклами
         }
 
-        for (int i = 0; i < row; ++i){ // Блок подсчта количества соседних
-            for (int j = 0; j < col; ++j){
+        for (int i = 0; i < max_y; ++i){ // Блок подсчта количества соседних
+            for (int j = 0; j < max_x; ++j){
                 int sum = 0;
-                if (i != 0 && j != 0 && i != row-1 && j != col-1){
-                    if (data[(i-1)*col+j-1])
+                if (i != 0 && j != 0 && i != max_y-1 && j != max_x-1){
+                    if (array[(i-1)*max_x+j-1])
                         ++sum;
-                    if (data[(i-1)*col+j])
+                    if (array[(i-1)*max_x+j])
                         ++sum;
-                    if (data[(i-1)*col+j+1])
+                    if (array[(i-1)*max_x+j+1])
                         ++sum;
-                    if (data[i*col+j-1])
+                    if (array[i*max_x+j-1])
                         ++sum;
-                    if (data[i*col+j+1])
+                    if (array[i*max_x+j+1])
                         ++sum;
-                    if (data[(i+1)*col+j-1])
+                    if (array[(i+1)*max_x+j-1])
                         ++sum;
-                    if (data[(i+1)*col+j])
+                    if (array[(i+1)*max_x+j])
                         ++sum;
-                    if (data[(i+1)*col+j+1])
+                    if (array[(i+1)*max_x+j+1])
                         ++sum;
                 }
                 
                 
-                if (data[i*col+j] && (sum == 2 || sum == 3))  // Если клетка живая условие
-                    new_data[i*col+j] = true;
-                else if (data[i*col+j] == false && sum == 3)  // Если клетка мёртвая условие
-                    new_data[i*col+j] = true;
+                if (array[i*max_x+j] && (sum == 2 || sum == 3))  // Если клетка живая условие
+                    new_array[i*max_x+j] = true;
+                else if (array[i*max_x+j] == false && sum == 3)  // Если клетка мёртвая условие
+                    new_array[i*max_x+j] = true;
                 else
-                    new_data[i*col+j] = false;
+                    new_array[i*max_x+j] = false;
             }
         }
 
-        for (int i = 0; i < row * col; ++i){ // обновление на новый цикл
-            data[i] = new_data[i];
+        for (int i = 0; i < max_y * max_x; ++i){ // обновление на новый цикл
+            array[i] = new_array[i];
         }
     }
 
