@@ -120,7 +120,7 @@ _start:
     ; Выделение памяти для массивов
     mov rax, [max_y]
     mov rbx, [max_x]
-    imul rax, rbx       ; 64-битное умножение
+    mul rbx       ; 64-битное умножение
     mov rbx, rax        ; сохраняем размер
     
     ; Проверка размера массивов
@@ -206,7 +206,7 @@ _start:
     
     ; Записываем живую клетку
     mov rax, [max_x]
-    imul rax, r14
+    mul r14
     add rax, r15
     mov byte [r12 + rax], 1
     inc r15
@@ -255,7 +255,7 @@ _start:
     jz .random_skip
     
     mov rax, [max_x]
-    imul rax, r14
+    mul r14
     add rax, r15
     mov byte [r12 + rax], 1
 
@@ -284,7 +284,7 @@ _start:
     jge .draw_next_row
     
     mov rax, [max_x]
-    imul rax, r14
+    mul r14
     add rax, r15
     cmp byte [r12 + rax], 0
     je .draw_skip
@@ -397,7 +397,7 @@ _start:
     
     ; Вычисляем индекс
     mov rax, [max_x]
-    imul rax, r14
+    mul r14
     add rax, r15
     
     mov cl, byte [r12 + rax]  ; текущее состояние
@@ -447,7 +447,7 @@ _start:
     
     ; Проверка клетки
     mov rax, [max_x]
-    imul rax, r8
+    mul r8
     add rax, r9
     cmp byte [r12 + rax], 0
     je .check_done
@@ -459,7 +459,7 @@ _start:
 .copy_array:
     ; Копируем new_array в array
     mov rax, [max_y]
-    imul rax, [max_x]
+    mul [max_x]
     mov rcx, rax
     xor rdx, rdx
 .copy_loop:
