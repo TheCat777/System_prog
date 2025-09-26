@@ -91,6 +91,10 @@ int main(int argc, char *argv[])
                 break;
         }
         else{
+            timeout(1);
+            int ch = getch();
+            if (ch == ' ') // условие выхода из игры
+                break;
             delay(100); // пауза между циклами
         }
 
