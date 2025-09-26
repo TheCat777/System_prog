@@ -158,6 +158,7 @@ _start:
 
 .check_r:
 	mov rax, [max_border_y]
+	
 	cmp [pos_y], rax
 	je .set_right
 	jmp .check_u
