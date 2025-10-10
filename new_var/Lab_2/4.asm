@@ -6,7 +6,7 @@ public _start
 public print_symb
 
 section '.bss' writable
-  number dq 2251689842
+  number dq ./5_  
   result dq 0
   ten dq 10
   temp db 1

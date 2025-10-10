@@ -21,8 +21,8 @@ section '.text' executable
        call print_symb      
        pop rcx             
        dec rcx              
-       cmp rcx, 0        
-       jl .iter
+       cmp rcx, -1     
+       jne .iter
     
     call new_line
 
