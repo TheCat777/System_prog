@@ -4,9 +4,11 @@ public _start
 include 'func.asm'
 
 
+section '.bss' writeable
 buffer rb 2
 buffer2 rb 2
 
+section '.text' executable
 _start:
     pop rcx
     cmp rcx, 4

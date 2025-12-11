@@ -14,7 +14,6 @@ _start:
 ; input:  rax
 ; output: rsi
 func:
-    mov rax, rax
     mov rcx, 10
     xor rbx, rbx
     mov rdi, 1
@@ -25,16 +24,15 @@ func:
 
         push rax
 
-        xor rbp, rbp
+        xor r8, r8
         .zero:
-            inc rbp
+            inc r8
             mov rax, 10 ; rdx *= 10
-            mov rdx, rdx
             mul rdx
 
             mov rdx, rax
 
-            cmp rdi, rbp
+            cmp rdi, r8
             jne .zero
         add rsi, rdx
         pop rax

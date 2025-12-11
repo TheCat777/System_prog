@@ -1,3 +1,3 @@
-fasm 2.asm 2.o
-ld 2.o -lc -lncurses -dynamic-linker /lib64/ld-linux-x86-64.so.2 -o 2.out
-./2.out 100 10
+fasm 8.asm 8.o
+ld 8.o -lc -lncurses -dynamic-linker /lib64/ld-linux-x86-64.so.2 -o 8.out
+./8.out 1.txt 2.txt 3.txt

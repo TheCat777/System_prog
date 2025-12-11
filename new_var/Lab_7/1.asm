@@ -2,17 +2,12 @@ format elf64
 
 public _start
 
-include 'func.asm'
-
 section '.bss' writable
-    buffer rb 200
+    buffer rb 1024
+    args rq 64
+    tokens rb 2048
     pid rq 1
     status rd 1
-    args rq 5
-
-    input db "1.txt", 0
-    input2 db "2.txt", 0
-    output db "3.txt", 0
 	
 section '.text' executable
 _start:	
@@ -21,17 +16,23 @@ main_loop:
     call input_keyboard
     mov rax, 57
     syscall
+    
+    cmp byte [buffer], 0
+    je main_loop
+
     cmp rax, 0
     jne wait_up
-    mov [args], buffer
-    mov [args+8], input
-    mov [args+16], input2 
-    mov [args+24], output
-    mov [args+32], 0
-    mov rsi, args
+
     mov rdi, buffer
+    call parse
+
+    mov rdi, [args]
+    lea rsi, [args]
+    xor rdx, rdx
     mov rax, 59
     syscall
+
+    ;syscall
     call exit
 
 wait_up:
@@ -42,3 +43,85 @@ wait_up:
     mov rax, 61
     syscall
     jmp main_loop
+
+;The function realizates user input from the keyboard
+;input: rsi - place of memory saved input string 
+input_keyboard:
+  push rax
+  push rdi
+  push rdx
+
+  mov rax, 0
+  mov rdi, 0
+  mov rdx, 255
+  syscall
+
+  xor rcx, rcx
+  .loop:
+     mov al, [rsi+rcx]
+     inc rcx
+     cmp rax, 0x0A
+     jne .loop
+  dec rcx
+  mov byte [rsi+rcx], 0
+  
+  pop rdx
+  pop rdi
+  pop rax
+  ret
+
+; Парсинг аргументов
+parse:
+    push rbx
+    push r12
+    push r13
+    
+    mov rbx, rdi
+    lea r12, [tokens]
+    lea r13, [args]
+    xor rcx, rcx
+    xor rdx, rdx
+    
+.skip:
+    mov al, [rbx + rdx]
+    test al, al
+    jz .done
+    cmp al, ' '
+    jne .start
+    inc rdx
+    jmp .skip
+
+.start:
+    mov [r13 + rcx*8], r12
+.copy:
+    mov al, [rbx + rdx]
+    test al, al
+    jz .end
+    cmp al, ' '
+    je .end
+    mov [r12], al
+    inc r12
+    inc rdx
+    jmp .copy
+
+.end:
+    mov byte [r12], 0
+    inc r12
+    inc rcx
+    mov al, [rbx + rdx]
+    test al, al
+    jz .done
+    inc rdx
+    jmp .skip
+
+.done:
+    mov qword [r13 + rcx*8], 0
+    pop r13
+    pop r12
+    pop rbx
+    ret
+
+exit:
+	mov rax, 0x3c
+	mov rdi, 0
+	syscall

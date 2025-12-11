@@ -52,7 +52,7 @@ _start:
     mov rsi, msg_yes
     mov rdx, msg_yes_len
     syscall
-    jmp exit
+    call exit
 
 .output_no:
     mov rax, 1
