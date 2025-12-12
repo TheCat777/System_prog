@@ -6,12 +6,8 @@ extrn initscr
 extrn endwin
 extrn clear
 extrn refresh
-extrn move
-extrn addch
+extrn mvaddch
 extrn addstr
-extrn getmaxyx
-extrn getmaxy
-extrn getmaxx
 extrn nodelay
 extrn cbreak
 extrn noecho
@@ -20,21 +16,28 @@ extrn keypad
 extrn getch
 extrn usleep
 extrn sin
+extrn stdscr
 
 section '.data' writeable
     A dq 10.0 
-    w dq 0.15 
+    w dq 0.2
     x dq 0.0 
-    step dq 0.1 
-    
-    rows dd 0
-    cols dd 0
-    center_y dd 0
-    center_x dd 0
+    step dq 0.15 
     
     key db 0
+    
     star db '*'
 
+    ; Константы
+    two_pi dq 6.283185307179586
+    min_A dq 1.0
+    min_w dq 0.05
+
+section '.bss' writeable
+    rows resd 1
+    cols resd 1
+    
+    temp resq 1
 
 section '.text' executable
 
@@ -42,164 +45,250 @@ _start:
     call initscr
     call cbreak
     call noecho
+    
     mov rdi, 0
     call curs_set
     
     mov rdi, 0
     mov rsi, 1
     call keypad
+    
+    mov rdi, 0
+    mov rsi, 1
     call nodelay
     
-	mov rdi, 0
-    call getmaxy
-    mov [rows], eax
+    mov dword [rows], 24
+    mov dword [cols], 80
     
-    call getmaxx
-    mov [cols], eax
-    
-    mov eax, [rows]
-    shr eax, 1
-    mov [center_y], eax
-    
-    mov eax, [cols]
-    shr eax, 1
-    mov [center_x], eax
-    
-    call main
+    call main_loop
     
     call endwin
+    
     mov rax, 60
     xor rdi, rdi
     syscall
 
-main:
+main_loop:
     push rbp
     mov rbp, rsp
     
-.loop:
+.main_loop:
     call clear
     
-    call draw
+    call draw_sine
     
     call refresh
     
-    call getch
-    mov [key], al
+    call handle_input
     
-    cmp al, '+'
-    je .incA
-    cmp al, '-'
-    je .decA
-    cmp al, ']'
-    je .incW
-    cmp al, '['
-    je .decW
-    cmp al, 27
-    je .exit
-    
-.input_done:
-    movq xmm0, [x]
-    addsd xmm0, [step]
-    movq [x], xmm0
-    
-    comisd xmm0, qword [two_pi]
-    jb .delay
-    pxor xmm0, xmm0
-    movq [x], xmm0
-    
-.delay:
-    mov rdi, 30000
+    mov rdi, 50000      ; 50ms
     call usleep
-    jmp .loop
-
-.incA:
-    movq xmm0, [A]
-    mov rax, 1
-    movq xmm1, rax
-    addsd xmm0, xmm1
-    movq [A], xmm0
-    jmp .input_done
-
-.decA:
-    movq xmm0, [A]
-    mov rax, 1
-    movq xmm1, rax
-    subsd xmm0, xmm1
-    comisd xmm0, qword [minA]
-    ja .storeA
-    movq xmm0, qword [minA]
-.storeA:
-    movq [A], xmm0
-    jmp .input_done
-
-.incW:
-    movq xmm0, [w]
-    mov rax, 0.05
-    movq xmm1, rax
-    addsd xmm0, xmm1
-    movq [w], xmm0
-    jmp .input_done
-
-.decW:
-    movq xmm0, [w]
-    mov rax, 0.05
-    movq xmm1, rax
-    subsd xmm0, xmm1
-    comisd xmm0, qword [minW]
-    ja .storeW
-    movq xmm0, qword [minW]
-.storeW:
-    movq [w], xmm0
-    jmp .input_done
-
-.exit:
+    
+    cmp byte [key], 27
+    jne .main_loop
+    
     pop rbp
     ret
 
-draw:
+draw_sine:
     push rbp
     mov rbp, rsp
-    sub rsp, 16
+    sub rsp, 32
     
-    ; y = A * sin(w*x)
     movq xmm0, [x]
     mulsd xmm0, [w]
+    
+    ; Вызываем sin
     movq [rsp], xmm0
     mov rdi, [rsp]
     call sin
-    movq xmm1, rax
-    mulsd xmm1, [A]
+    movq xmm1, rax 
     
-    cvtsd2si rbx, xmm1      ; y
-    cvtsd2si rcx, [x]       ; x
+    mulsd xmm1, [A] 
     
-    mov eax, [center_y]
-    sub eax, ebx
-    mov edi, eax  
+    cvtsd2si rbx, xmm1 
+    cvtsd2si rcx, [x] 
     
-    mov eax, [center_x]
-    add eax, ecx
-    mov esi, eax  
+    mov eax, 12
+    sub eax, ebx 
     
-    cmp edi, 2
+    mov edx, 40   
+    add edx, ecx  
+    
+    ; Проверяем границы
+    cmp eax, 2              ; пропускаем первые 2 строки
     jl .skip
-    cmp edi, [rows]
+    cmp eax, 24
     jge .skip
-    cmp esi, 0
+    cmp edx, 0
     jl .skip
-    cmp esi, [cols]
+    cmp edx, 80
     jge .skip
     
-    call move
+    ; Рисуем точку
+    mov rdi, rax
+    mov rsi, rdx
+    call move_cursor
     mov rdi, star
     call addch
     
 .skip:
-    add rsp, 16
+    ; Увеличиваем x
+    movq xmm0, [x]
+    addsd xmm0, [step]
+    movq [x], xmm0
+    
+    ; Сбрасываем при 2π
+    comisd xmm0, [two_pi]
+    jb .done
+    pxor xmm0, xmm0
+    movq [x], xmm0
+    
+.done:
+    add rsp, 32
     pop rbp
     ret
 
-section '.data'
-    two_pi dq 6.283185307179586
-    minA dq 1.0
-    minW dq 0.05
+; Обработка ввода
+handle_input:
+    push rbp
+    mov rbp, rsp
+    
+    call getch
+    mov [key], al
+    
+    cmp al, -1
+    je .done
+    
+    cmp al, '+'
+    je .inc_amp
+    cmp al, '-'
+    je .dec_amp
+    cmp al, ']'
+    je .inc_freq
+    cmp al, '['
+    je .dec_freq
+    jmp .done
+
+.inc_amp:
+    movq xmm0, [A]
+    addsd xmm0, 1.0
+    movq [A], xmm0
+    jmp .done
+
+.dec_amp:
+    movq xmm0, [A]
+    subsd xmm0, 1.0
+    comisd xmm0, [min_A]
+    ja .store_amp
+    movq xmm0, [min_A]
+.store_amp:
+    movq [A], xmm0
+    jmp .done
+
+.inc_freq:
+    movq xmm0, [w]
+    addsd xmm0, 0.05
+    movq [w], xmm0
+    jmp .done
+
+.dec_freq:
+    movq xmm0, [w]
+    subsd xmm0, 0.05
+    comisd xmm0, [min_w]
+    ja .store_freq
+    movq xmm0, [min_w]
+.store_freq:
+    movq [w], xmm0
+
+.done:
+    pop rbp
+    ret
+
+; Вспомогательная функция для перемещения курсора
+move_cursor:
+    ; rdi = y, rsi = x
+    push rdi
+    push rsi
+    ; Используем ANSI escape codes для переносимости
+    call move_cursor_ansi
+    add rsp, 16
+    ret
+
+move_cursor_ansi:
+    ; Выводим ANSI escape sequence: ESC [ y ; x H
+    push rbp
+    mov rbp, rsp
+    
+    ; Преобразуем координаты в строку
+    sub rsp, 32
+    mov byte [rsp], 0x1B    ; ESC
+    mov byte [rsp+1], '['
+    
+    ; Преобразуем y в строку
+    mov rax, rdi
+    lea rcx, [rsp+2]
+    call int_to_str
+    
+    ; Добавляем ;
+    mov byte [rcx], ';'
+    inc rcx
+    
+    ; Преобразуем x в строку
+    mov rax, rsi
+    call int_to_str
+    
+    ; Добавляем H
+    mov byte [rcx], 'H'
+    inc rcx
+    mov byte [rcx], 0
+    
+    ; Выводим
+    mov rax, 1              ; sys_write
+    mov rdi, 1              ; stdout
+    lea rsi, [rsp]
+    mov rdx, rcx
+    sub rdx, rsp
+    syscall
+    
+    add rsp, 32
+    pop rbp
+    ret
+
+; Преобразование числа в строку (упрощенное)
+int_to_str:
+    ; rax = число, rcx = буфер
+    push rbx
+    mov rbx, 10
+    push rcx
+    
+    ; Вычисляем длину
+    mov r8, rax
+    mov r9, 1
+.len_loop:
+    xor rdx, rdx
+    div rbx
+    test rax, rax
+    jz .len_done
+    inc r9
+    jmp .len_loop
+    
+.len_done:
+    mov rax, r8
+    add rcx, r9
+    mov byte [rcx], 0
+    
+.convert:
+    xor rdx, rdx
+    div rbx
+    add dl, '0'
+    dec rcx
+    mov [rcx], dl
+    test rax, rax
+    jnz .convert
+    
+    pop rax
+    pop rbx
+    mov rcx, rax
+    add rcx, r9
+    ret

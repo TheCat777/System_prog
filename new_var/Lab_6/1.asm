@@ -28,7 +28,7 @@ format ELF64
     extrn usleep
 
 
-	section '.bss' writable
+section '.bss' writable
 
     max_x dq 1
     max_y dq 1
@@ -48,13 +48,7 @@ format ELF64
     delay dq ?
     speed_mode dq 1
 
-	h1 db "1",0
-	h2 db "2",0
-	h3 db "3",0
-	h4 db "4",0
-
-
-	section '.text' executable
+section '.text' executable
 
 _start:
 	call initscr

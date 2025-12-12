@@ -8,9 +8,33 @@ section '.bss' writable
     tokens rb 2048
     pid rq 1
     status rd 1
+
+    ; Переменные окружения (обязательные для ncurses)
+    env_term db "TERM=xterm-256color", 0
+    env_path db "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin", 0
+    env_home db "HOME=/home/user", 0
+    env_user db "USER=user", 0
+    env_shell db "SHELL=/bin/bash", 0
+    env_pwd db "PWD=.", 0
+    envp rq 16
 	
 section '.text' executable
 _start:	
+; Инициализация массива envp
+    lea rax, [env_term]
+    mov [envp], rax
+    lea rax, [env_path]
+    mov [envp + 8], rax
+    lea rax, [env_home]
+    mov [envp + 16], rax
+    lea rax, [env_user]
+    mov [envp + 24], rax
+    lea rax, [env_shell]
+    mov [envp + 32], rax
+    lea rax, [env_pwd]
+    mov [envp + 40], rax
+    mov qword [envp + 48], 0  ; NULL терминатор
+
 main_loop:
     mov rsi, buffer
     call input_keyboard
@@ -28,7 +52,7 @@ main_loop:
 
     mov rdi, [args]
     lea rsi, [args]
-    xor rdx, rdx
+    lea rdx, [envp]
     mov rax, 59
     syscall
 
